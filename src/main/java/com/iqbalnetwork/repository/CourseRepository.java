@@ -2,6 +2,8 @@ package com.iqbalnetwork.repository;
 
 
 import com.iqbalnetwork.models.Course;
+import com.iqbalnetwork.utils.IRandomString;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -11,6 +13,8 @@ import java.util.Optional;
 @Repository
 public class CourseRepository implements ICourseRepository {
     private List<Course> courses = new ArrayList<>();
+    @Autowired
+    private IRandomString randomString;
 
     @Override
     public List<Course> getAll() throws Exception {
@@ -19,6 +23,7 @@ public class CourseRepository implements ICourseRepository {
 
     @Override
     public Course create(Course course) throws Exception {
+        course.setCourseId(randomString.random());
         courses.add(course);
         return course;
     }
@@ -48,11 +53,12 @@ public class CourseRepository implements ICourseRepository {
 
     @Override
     public void delete(String id) throws Exception {
-        for (Course course : courses) {
-            if (course.getCourseId() == id) {
-                courses.remove(course);
-                break;
-            }
-        }
+//        for (Course course : courses) {
+//            if (course.getCourseId() == id) {
+//                courses.remove(Integer.parseInt(id));
+//                break;
+//            }
+//        }
+        courses.remove(Optional.of(findById(id)));
     }
 }
