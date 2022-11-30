@@ -8,9 +8,10 @@ import java.util.Optional;
 public interface ICourseServices {
     List<Course> getAll();
 
-    Course create(Course course);
+    Course create(Course course) throws Exception;
 
-    Optional<Course> get(String id);
-    void update(Course course,String id);
+    Optional<Course> get(String id) throws Exception;
+    void update(Course course,String id) throws Exception;
     void delete(String id);
+    List<Course> getBy(String keyword,String value) throws Exception;
 }

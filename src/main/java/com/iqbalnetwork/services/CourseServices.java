@@ -1,5 +1,7 @@
 package com.iqbalnetwork.services;
 
+import com.iqbalnetwork.controllers.exceptions.EmptyFieldException;
+import com.iqbalnetwork.controllers.exceptions.NotFoundException;
 import com.iqbalnetwork.models.Course;
 import com.iqbalnetwork.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,31 +25,31 @@ public class CourseServices implements ICourseServices {
     }
 
     @Override
-    public Course create(Course course) {
-        try {
-            courseRepository.create(course);
-            return course;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    public Course create(Course course) throws Exception {
+        var isNotValid = (course.getTitle().isBlank());
+        if (isNotValid) {
+            throw new EmptyFieldException();
         }
+        courseRepository.create(course);
+        return course;
     }
 
     @Override
-    public Optional<Course> get(String id) {
-        try {
-            return courseRepository.findById(id);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    public Optional<Course> get(String id) throws Exception {
+        var result = courseRepository.findById(id);
+        if (result.isEmpty()) {
+            throw new NotFoundException();
         }
+        return result;
     }
 
     @Override
-    public void update(Course course, String id) {
-        try {
-            courseRepository.update(course, id);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    public void update(Course course, String id) throws Exception {
+        var result = courseRepository.findById(id);
+        if (result.isEmpty()) {
+            throw new NotFoundException();
         }
+        courseRepository.update(course, id);
     }
 
     @Override
@@ -57,5 +59,14 @@ public class CourseServices implements ICourseServices {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<Course> getBy(String keyword, String value) throws Exception {
+        var result = courseRepository.getBy(keyword, value);
+        if (result.isEmpty() || result == null) {
+            throw new NotFoundException();
+        }
+        return result;
     }
 }

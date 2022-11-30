@@ -1,6 +1,7 @@
 package com.iqbalnetwork.repository;
 
 
+import com.iqbalnetwork.controllers.exceptions.NotFoundException;
 import com.iqbalnetwork.models.Course;
 import com.iqbalnetwork.utils.IRandomString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class CourseRepository implements ICourseRepository {
@@ -49,6 +51,7 @@ public class CourseRepository implements ICourseRepository {
                 break;
             }
         }
+        throw new NotFoundException();
     }
 
     @Override
@@ -60,5 +63,34 @@ public class CourseRepository implements ICourseRepository {
 //            }
 //        }
         courses.remove(Optional.of(findById(id)));
+    }
+
+    @Override
+    public List<Course> getBy(String keyword, String value) throws Exception {
+        List<Course> result;
+        switch (keyword.toLowerCase()) {
+            case "title":
+                result = courses.stream().filter(i -> i.getTitle().toLowerCase().equalsIgnoreCase(value)).collect(Collectors.toList());
+                break;
+            case "id":
+                result = courses.stream()
+                        .filter(i -> i.getCourseId()
+                                .toLowerCase()
+                                .equalsIgnoreCase(value))
+                        .collect(Collectors.toList());
+                break;
+            case "description":
+                result = courses.stream()
+                        .filter(i -> i.getDescription().toLowerCase().contains(value.toLowerCase()))
+                        .collect(Collectors.toList());
+                break;
+            case "link":
+                result = courses.stream()
+                        .filter(i -> i.getLink().equalsIgnoreCase(value))
+                        .collect(Collectors.toList());
+            default:
+                return null;
+        }
+        return result;
     }
 }
