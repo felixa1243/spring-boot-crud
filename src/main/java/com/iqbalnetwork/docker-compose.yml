@@ -3,10 +3,10 @@ services:
     image: postgres:latest
     container_name: restapi
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=${USERNAME}
+      - POSTGRES_PASSWORD=${PASSWORD}
     ports:
-      - '5000:5432'
+      - '${PORT}:5432'
     volumes:
       - db:/var/lib/postgresql/data
 volumes:
