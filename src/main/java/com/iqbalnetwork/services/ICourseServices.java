@@ -12,6 +12,6 @@ public interface ICourseServices {
 
     Optional<Course> get(String id) throws Exception;
     void update(Course course,String id) throws Exception;
-    void delete(String id);
+    void delete(String id) throws Exception;
     List<Course> getBy(String keyword,String value) throws Exception;
 }

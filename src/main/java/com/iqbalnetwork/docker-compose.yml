@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: restapi
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5000:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+    driver: local

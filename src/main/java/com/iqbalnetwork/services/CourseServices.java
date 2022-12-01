@@ -1,72 +1,107 @@
 package com.iqbalnetwork.services;
 
-import com.iqbalnetwork.controllers.exceptions.EmptyFieldException;
-import com.iqbalnetwork.controllers.exceptions.NotFoundException;
+import com.iqbalnetwork.controllers.exceptions.EntityExistException;
 import com.iqbalnetwork.models.Course;
-import com.iqbalnetwork.repository.CourseRepository;
+import com.iqbalnetwork.repository.ICourseRepos;
+import com.iqbalnetwork.utils.IRandomString;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@Qualifier("real_db")
 public class CourseServices implements ICourseServices {
     @Autowired
-    private CourseRepository courseRepository;
+    ICourseRepos repos;
+    @Autowired
+    IRandomString randomString;
 
     @Override
     public List<Course> getAll() {
-        try {
-            return courseRepository.getAll();
-        } catch (Exception err) {
-            throw new RuntimeException(err);
-        }
+        return repos.findAll();
     }
 
     @Override
     public Course create(Course course) throws Exception {
-        var isNotValid = (course.getTitle().isBlank());
-        if (isNotValid) {
-            throw new EmptyFieldException();
+        var result = repos.findAll()
+                .stream()
+                .filter(i -> i.getTitle().equalsIgnoreCase(course.getTitle()))
+                .collect(Collectors.toList());
+        if (!result.isEmpty()) {
+            throw new EntityExistException();
         }
-        courseRepository.create(course);
-        return course;
+        course.setCourseId(randomString.random());
+        return repos.save(course);
     }
 
     @Override
     public Optional<Course> get(String id) throws Exception {
-        var result = courseRepository.findById(id);
+        var result = repos.findById(id);
         if (result.isEmpty()) {
-            throw new NotFoundException();
+            throw new NoSuchElementException();
         }
         return result;
     }
 
     @Override
     public void update(Course course, String id) throws Exception {
-        var result = courseRepository.findById(id);
-        if (result.isEmpty()) {
-            throw new NotFoundException();
-        }
-        courseRepository.update(course, id);
+        var result = get(id);
+        result.get()
+                .setCourseId(id)
+                .setDescription(course.getDescription())
+                .setTitle(course.getTitle())
+                .setLink(course.getLink())
+        ;
+        repos.save(result.get());
     }
 
     @Override
-    public void delete(String id) {
-        try {
-            courseRepository.delete(id);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public void delete(String id) throws Exception {
+        var result = get(id);
+        repos.delete(result.get());
     }
 
     @Override
     public List<Course> getBy(String keyword, String value) throws Exception {
-        var result = courseRepository.getBy(keyword, value);
-        if (result.isEmpty() || result == null) {
-            throw new NotFoundException();
+        List<Course> results = new ArrayList<>();
+        switch (keyword.toLowerCase()) {
+            case "id":
+                results.add(repos.findById(value).get());
+                break;
+            case "title":
+                var result = repos
+                        .findAll().stream()
+                        .filter(i -> i.getTitle()
+                                .equalsIgnoreCase(value))
+                        .collect(Collectors.toList());
+                for (var i :
+                        result) {
+                    results.add(i);
+                }
+                break;
+            case "description":
+                var resultDesc = repos
+                        .findAll().stream()
+                        .filter(i -> i.getDescription()
+                                .contains(value.toLowerCase()))
+                        .collect(Collectors.toList());
+                for (var i :
+                        resultDesc) {
+                    results.add(i);
+                }
+                break;
+            default:
+                throw new NoSuchElementException();
         }
-        return result;
+        if (results.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return results;
     }
 }

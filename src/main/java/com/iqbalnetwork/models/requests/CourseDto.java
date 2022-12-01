@@ -11,8 +11,8 @@ import javax.validation.constraints.Pattern;
 @Getter
 @Setter
 @ToString
-public class CourseRequest {
-    @NotBlank(message = "Title is required")
+public class CourseDto {
+    @NotBlank(message = "{invalid.title.required}")
     private String title;
     @Length(min = 100, max = 1000)
     private String description;
