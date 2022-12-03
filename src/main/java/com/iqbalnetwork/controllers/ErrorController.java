@@ -31,7 +31,9 @@ public class ErrorController {
         for (FieldError error : fieldErrors) {
             errors.add(error.getDefaultMessage());
         }
-        return ResponseEntity.status(400).body(new ErrorResponse(400, errors.toString()));
+        return ResponseEntity
+                .status(400)
+                .body(new ErrorResponse(400,errors.toString()));
     }
 
     @ExceptionHandler(EntityExistException.class)
