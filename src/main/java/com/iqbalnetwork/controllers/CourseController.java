@@ -1,10 +1,10 @@
 package com.iqbalnetwork.controllers;
 
 import com.iqbalnetwork.models.Course;
-import com.iqbalnetwork.models.requests.CourseDto;
-import com.iqbalnetwork.models.responses.ErrorResponse;
+import com.iqbalnetwork.models.request.CourseDto;
 import com.iqbalnetwork.models.responses.SuccessResponse;
 import com.iqbalnetwork.services.ICourseServices;
+import com.iqbalnetwork.utils.IRandomString;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,20 +23,17 @@ import java.util.Optional;
 @Validated
 public class CourseController {
     @Autowired
+    IRandomString randomString;
+    @Autowired
     @Qualifier("real_db")
     private ICourseServices courseServices;
     @Autowired
     private ModelMapper mapper;
 
     @GetMapping(params = {"key", "value"})
-    public ResponseEntity getBy(@RequestParam(defaultValue = "id") @NotBlank(message = "{invalid.title.required}") String key, @RequestParam String value) {
-        try {
-            return ResponseEntity.status(200)
-                    .body(new SuccessResponse<>("Success", courseServices.getBy(key, value)));
-        } catch (Exception e) {
-            return ResponseEntity.status(404)
-                    .body(new ErrorResponse(404, e.getMessage()));
-        }
+    public ResponseEntity getBy(@RequestParam(defaultValue = "id") @NotBlank(message = "{invalid.title.required}") String key, @RequestParam String value) throws Exception {
+        return ResponseEntity.status(200)
+                .body(new SuccessResponse<>("Success", courseServices.getBy(key, value)));
     }
 
     @GetMapping
@@ -58,12 +55,13 @@ public class CourseController {
     }
 
     @PostMapping("/add")
-
     public ResponseEntity addCourse(@Valid @RequestBody CourseDto course) throws Exception {
+        Course mapped = mapper.map(course, Course.class);
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(
-                        new SuccessResponse<Course>("Add data success", courseServices.create(mapper.map(course, Course.class)))
+                        new SuccessResponse<>("Add data success", courseServices.create(mapped))
                 );
     }
 

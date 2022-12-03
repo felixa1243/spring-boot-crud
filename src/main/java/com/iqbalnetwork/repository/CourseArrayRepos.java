@@ -21,7 +21,7 @@ public class CourseArrayRepos implements CourseArray {
 
     @Override
     public Course create(Course course) throws Exception {
-        course.setCourseId(randomString.random());
+        course.setId(randomString.random());
         courses.add(course);
         return course;
     }
@@ -30,7 +30,7 @@ public class CourseArrayRepos implements CourseArray {
     public Optional<Course> findById(String id) throws Exception {
         for (Course course :
                 courses) {
-            if (course.getCourseId().equals(id)) {
+            if (course.getId().equals(id)) {
                 return Optional.of(course);
             }
         }
@@ -40,7 +40,7 @@ public class CourseArrayRepos implements CourseArray {
     @Override
     public void update(Course course, String id) throws Exception {
         for (Course existingCourse : courses) {
-            if (existingCourse.getCourseId().equals(id)) {
+            if (existingCourse.getId().equals(id)) {
                 existingCourse.setTitle(course.getTitle());
                 existingCourse.setDescription(course.getDescription());
                 existingCourse.setLink(course.getLink());
@@ -69,7 +69,7 @@ public class CourseArrayRepos implements CourseArray {
                 break;
             case "id":
                 result = courses.stream()
-                        .filter(i -> i.getCourseId()
+                        .filter(i -> i.getId()
                                 .toLowerCase()
                                 .equalsIgnoreCase(value))
                         .collect(Collectors.toList());

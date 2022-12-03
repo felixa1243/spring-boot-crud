@@ -2,12 +2,16 @@ package com.iqbalnetwork.services;
 
 import com.iqbalnetwork.controllers.exceptions.EntityExistException;
 import com.iqbalnetwork.models.Course;
+import com.iqbalnetwork.models.CourseType;
+import com.iqbalnetwork.repository.CourseTypeRepo;
 import com.iqbalnetwork.repository.ICourseRepos;
-import com.iqbalnetwork.utils.IRandomString;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -16,11 +20,16 @@ import java.util.stream.Collectors;
 
 @Service
 @Qualifier("real_db")
-public class CourseServices implements ICourseServices {
+@Transactional
+public class CourseService implements ICourseServices<Course, String> {
     @Autowired
-    ICourseRepos repos;
+    private ModelMapper modelMapper;
     @Autowired
-    IRandomString randomString;
+    private ICourseRepos repos;
+    @Autowired
+    private CourseInfoService courseInfoService;
+    @Autowired
+    private CourseTypeRepo courseTypeRepos;
 
     @Override
     public List<Course> getAll() {
@@ -29,15 +38,14 @@ public class CourseServices implements ICourseServices {
 
     @Override
     public Course create(Course course) throws Exception {
-        var result = repos.findAll()
-                .stream()
-                .filter(i -> i.getTitle().equalsIgnoreCase(course.getTitle()))
-                .collect(Collectors.toList());
-        if (!result.isEmpty()) {
+        try {
+            Optional<CourseType> type = courseTypeRepos.findById(course.getCourseType().getCourseTypeId());
+            System.out.println(type.get());
+            course.setCourseType(type.get());
+            return repos.save(course);
+        } catch (DataIntegrityViolationException e) {
             throw new EntityExistException();
         }
-        course.setCourseId(randomString.random());
-        return repos.save(course);
     }
 
     @Override
@@ -53,7 +61,7 @@ public class CourseServices implements ICourseServices {
     public void update(Course course, String id) throws Exception {
         var result = get(id);
         result.get()
-                .setCourseId(id)
+                .setId(id)
                 .setDescription(course.getDescription())
                 .setTitle(course.getTitle())
                 .setLink(course.getLink())
@@ -68,11 +76,14 @@ public class CourseServices implements ICourseServices {
     }
 
     @Override
-    public List<Course> getBy(String keyword, String value) throws Exception {
-        List<Course> results = new ArrayList<>();
+    public Optional<List<Course>> getBy(String keyword, String value) {
+        Optional<List<Course>> results = Optional.empty();
+        List<Course> dump = new ArrayList<>();
         switch (keyword.toLowerCase()) {
             case "id":
-                results.add(repos.findById(value).get());
+                dump.add(repos
+                        .findById(value).get());
+                results = Optional.of(dump);
                 break;
             case "title":
                 var result = repos
@@ -82,8 +93,9 @@ public class CourseServices implements ICourseServices {
                         .collect(Collectors.toList());
                 for (var i :
                         result) {
-                    results.add(i);
+                    dump.add(i);
                 }
+                results = Optional.of(dump);
                 break;
             case "description":
                 var resultDesc = repos
@@ -93,8 +105,9 @@ public class CourseServices implements ICourseServices {
                         .collect(Collectors.toList());
                 for (var i :
                         resultDesc) {
-                    results.add(i);
+                    dump.add(i);
                 }
+                results = Optional.of(dump);
                 break;
             default:
                 throw new NoSuchElementException();
