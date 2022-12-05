@@ -1,5 +1,5 @@
 server:
-  port: 3000
+  port: 4000
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -12,3 +12,8 @@ spring:
     hibernate:
       ddl-auto: create
     database: POSTGRESQL
+service:
+  payment:
+    url: ${PAYMENT_SERVICE}
+  user:
+    uri: ${USER_SERVICE}
