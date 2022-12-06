@@ -1,9 +1,11 @@
 package com.iqbalnetwork.models.request;
 
-import com.iqbalnetwork.utils.Level;
-import lombok.Data;
+import com.iqbalnetwork.utils.constant.Level;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class CourseReqWithFile extends FormDataWithFileReq {
     private String title;
     private String description;

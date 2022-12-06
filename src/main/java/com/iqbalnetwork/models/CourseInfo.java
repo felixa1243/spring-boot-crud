@@ -1,6 +1,6 @@
 package com.iqbalnetwork.models;
 
-import com.iqbalnetwork.utils.Level;
+import com.iqbalnetwork.utils.constant.Level;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

@@ -4,6 +4,7 @@ import com.iqbalnetwork.controllers.exceptions.EntityExistException;
 import com.iqbalnetwork.controllers.exceptions.NotFoundException;
 import com.iqbalnetwork.controllers.exceptions.RestTemplateException;
 import com.iqbalnetwork.models.responses.ErrorResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class ErrorController {
@@ -48,5 +50,14 @@ public class ErrorController {
     @ExceptionHandler(RestTemplateException.class)
     public ResponseEntity<ErrorResponse> handleRestTemplateException(RestTemplateException e) {
         return ResponseEntity.status(400).body(new ErrorResponse(400, e.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataException(DataIntegrityViolationException e) {
+        return ResponseEntity.status(400).body(new ErrorResponse(400, e.getMessage()));
+    }
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ErrorResponse> handleNoSuchException(NoSuchElementException e){
+        return ResponseEntity.status(404).body(new ErrorResponse(404, "Not found"));
     }
 }

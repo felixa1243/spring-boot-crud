@@ -21,9 +21,10 @@ public class UserRepo implements IUserRepo {
     public UserResponse[] getAll() {
         try {
             ResponseEntity<UserResponse[]> response = restTemplate.getForEntity(url, UserResponse[].class);
+            //restTemplate. get -> dari url -> ubah ke array of UserResponse
             return response.getBody();
-        } catch (Exception err) {
-            System.out.println(err.getMessage());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
             return null;
         }
     }

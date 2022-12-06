@@ -1,4 +1,4 @@
-package com.iqbalnetwork.utils;
+package com.iqbalnetwork.utils.constant;
 
 public enum Level {
     BEGINNER, INTERMEDIATE, ALL

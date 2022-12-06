@@ -3,8 +3,11 @@ package com.iqbalnetwork.services;
 import com.iqbalnetwork.models.CourseType;
 import com.iqbalnetwork.repository.CourseTypeRepo;
 import com.iqbalnetwork.utils.IRandomString;
+import com.iqbalnetwork.utils.SearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -51,5 +54,15 @@ public class CourseTypeService implements ICourseServices<CourseType, String> {
     @Override
     public Optional<List<CourseType>> getBy(String keyword, String value) throws Exception {
         return Optional.empty();
+    }
+
+    @Override
+    public Page get(Pageable pageable) {
+        return repo.findAll(pageable);
+    }
+
+    @Override
+    public Page<CourseType> getAll(List<SearchCriteria> searchCriteria, Pageable pageable) throws Exception {
+        return null;
     }
 }

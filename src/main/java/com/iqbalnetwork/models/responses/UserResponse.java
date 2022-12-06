@@ -13,7 +13,6 @@ public class UserResponse {
     private Company company;
 }
 
-@Data
 class Address {
     private String street;
     class Geo {

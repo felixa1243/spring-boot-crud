@@ -1,12 +1,16 @@
 package com.iqbalnetwork.services;
 
 import com.iqbalnetwork.models.Course;
-import com.iqbalnetwork.repository.CourseTypeRepo;
 import com.iqbalnetwork.repository.ICourseRepos;
+import com.iqbalnetwork.repository.specifications.CourseSpecification;
+import com.iqbalnetwork.utils.SearchCriteria;
+import com.iqbalnetwork.utils.constant.SearchOperation;
 import lombok.Getter;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -18,6 +22,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
 @Qualifier("real_db")
 @Transactional
@@ -25,13 +30,7 @@ public class CourseService implements ICourseServices<Course, String> {
     @Getter
     private final Path root = Paths.get("/home/user/latihan/assets");
     @Autowired
-    private ModelMapper modelMapper;
-    @Autowired
     private ICourseRepos repos;
-    @Autowired
-    private CourseInfoService courseInfoService;
-    @Autowired
-    private CourseTypeRepo courseTypeRepos;
 
     @Override
     public List<Course> getAll() {
@@ -112,7 +111,30 @@ public class CourseService implements ICourseServices<Course, String> {
         return results;
     }
 
-//    @Override
+    @Override
+    public Page get(Pageable pageable) {
+        return repos.findAll(pageable);
+    }
+
+    @Override
+    public Page<Course> getAll(List<SearchCriteria> searchCriteria, Pageable pageable) throws Exception {
+        Specification<Course> courseSpecification = Specification.where(new CourseSpecification(searchCriteria.get(0)));
+
+        for (int i = 1; i < searchCriteria.size(); i++) {
+            SearchCriteria searchCriterion = searchCriteria.get(i);
+            CourseSpecification newSpecs = new CourseSpecification(
+                    searchCriterion
+            );
+            if (searchCriterion.getSearchOperation() == SearchOperation.AND) {
+                courseSpecification = Specification.where(courseSpecification).and(newSpecs);
+            } else {
+                courseSpecification = Specification.where(courseSpecification).or(newSpecs);
+            }
+        }
+        return repos.findAll(courseSpecification, pageable);
+    }
+
+    //    @Override
 //    public void createFolder(String foldername) {
 //        File dir = new File(root.toString() + "/" + foldername);
 //        if (!dir.exists()) {
