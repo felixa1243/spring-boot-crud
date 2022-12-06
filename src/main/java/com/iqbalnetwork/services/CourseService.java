@@ -1,17 +1,17 @@
 package com.iqbalnetwork.services;
 
-import com.iqbalnetwork.controllers.exceptions.EntityExistException;
 import com.iqbalnetwork.models.Course;
-import com.iqbalnetwork.models.CourseType;
 import com.iqbalnetwork.repository.CourseTypeRepo;
 import com.iqbalnetwork.repository.ICourseRepos;
+import lombok.Getter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @Qualifier("real_db")
 @Transactional
 public class CourseService implements ICourseServices<Course, String> {
+    @Getter
+    private final Path root = Paths.get("/home/user/latihan/assets");
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
@@ -38,14 +40,7 @@ public class CourseService implements ICourseServices<Course, String> {
 
     @Override
     public Course create(Course course) throws Exception {
-        try {
-            Optional<CourseType> type = courseTypeRepos.findById(course.getCourseType().getCourseTypeId());
-            System.out.println(type.get());
-            course.setCourseType(type.get());
-            return repos.save(course);
-        } catch (DataIntegrityViolationException e) {
-            throw new EntityExistException();
-        }
+        return repos.save(course);
     }
 
     @Override
@@ -62,7 +57,6 @@ public class CourseService implements ICourseServices<Course, String> {
         var result = get(id);
         result.get()
                 .setId(id)
-                .setDescription(course.getDescription())
                 .setTitle(course.getTitle())
                 .setLink(course.getLink())
         ;
@@ -117,4 +111,17 @@ public class CourseService implements ICourseServices<Course, String> {
         }
         return results;
     }
+
+//    @Override
+//    public void createFolder(String foldername) {
+//        File dir = new File(root.toString() + "/" + foldername);
+//        if (!dir.exists()) {
+//            dir.mkdir();
+//        }
+//    }
+//
+//    @Override
+//    public void createFile(MultipartFile file) throws Exception {
+//        Files.copy(file.getInputStream(), root.resolve(file.getOriginalFilename()));
+//    }
 }

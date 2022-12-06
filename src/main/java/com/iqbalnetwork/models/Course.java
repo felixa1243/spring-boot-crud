@@ -20,7 +20,7 @@ public class Course {
 
     @Column(name = "title", nullable = false, length = 150, unique = true)
     private String title;
-    @Column(name = "description", nullable = false,columnDefinition = "TEXT")
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "link", nullable = false, length = 50)
@@ -33,4 +33,8 @@ public class Course {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "course_info_id")
     private CourseInfo courseInfo;
+    @Column(name = "file_url")
+    private String fileUrl;
+    @Column(name = "file_name")
+    private String fileName;
 }

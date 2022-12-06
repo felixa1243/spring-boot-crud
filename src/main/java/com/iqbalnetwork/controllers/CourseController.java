@@ -1,7 +1,11 @@
 package com.iqbalnetwork.controllers;
 
+import com.google.gson.Gson;
 import com.iqbalnetwork.models.Course;
+import com.iqbalnetwork.models.CourseInfo;
+import com.iqbalnetwork.models.CourseType;
 import com.iqbalnetwork.models.request.CourseDto;
+import com.iqbalnetwork.models.request.CourseReqWithFile;
 import com.iqbalnetwork.models.responses.SuccessResponse;
 import com.iqbalnetwork.services.ICourseServices;
 import com.iqbalnetwork.utils.IRandomString;
@@ -12,9 +16,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +37,11 @@ public class CourseController {
     private ICourseServices courseServices;
     @Autowired
     private ModelMapper mapper;
+    @Autowired
+    private Gson gson;
+    @Autowired
+    @Qualifier("course_type_svc")
+    private ICourseServices courseTypeSvc;
 
     @GetMapping(params = {"key", "value"})
     public ResponseEntity getBy(@RequestParam(defaultValue = "id") @NotBlank(message = "{invalid.title.required}") String key, @RequestParam String value) throws Exception {
@@ -54,10 +67,39 @@ public class CourseController {
                 .body(new SuccessResponse<Optional<Course>>("success", courseServices.get(id)));
     }
 
-    @PostMapping("/add")
-    public ResponseEntity addCourse(@Valid @RequestBody CourseDto course) throws Exception {
-        Course mapped = mapper.map(course, Course.class);
+    @PostMapping
+    @RequestMapping(value = "/add", method = RequestMethod.POST, consumes = {
+            "multipart/form-data"
+    })
+    public ResponseEntity addCourse(CourseReqWithFile course) throws Exception {
 
+        CourseDto courseDto = mapper.map(course, CourseDto.class);
+
+        Optional<CourseType> courseType = courseTypeSvc.get(course.getCourseTypeId());
+        if (courseType.isPresent()) {
+            courseDto.setCourseType(courseType.get());
+        }
+
+        CourseInfo courseInfo = new CourseInfo()
+                .setDuration(course.getCourseDuration())
+                .setLevel(course.getCourseLevel());
+
+        courseDto.setCourseInfo(courseInfo);
+        Course mapped = mapper.map(courseDto, Course.class);
+
+        String filename = course.getFile().getOriginalFilename();
+        MultipartFile file = course.getFile();
+        System.out.println(file.getOriginalFilename());
+
+        Path root = Paths.get("/home/user/latihan/assets/course/");
+        try {
+            Files.copy(course.getFile().getInputStream(), root.resolve(filename));
+        } catch (Exception err) {
+            throw new RuntimeException("Couldn't store the file Error: " + err.getMessage());
+        }
+
+        mapped.setFileUrl(root.toString());
+        mapped.setFileName(course.getFile().getOriginalFilename());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(

@@ -22,6 +22,7 @@ public class ErrorController {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllException(Exception err) {
+        System.out.println(err);
         return ResponseEntity.status(500).body(new ErrorResponse(500, err.getMessage()));
     }
 

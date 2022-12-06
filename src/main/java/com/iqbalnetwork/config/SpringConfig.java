@@ -1,5 +1,6 @@
 package com.iqbalnetwork.config;
 
+import com.google.gson.Gson;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -29,5 +30,10 @@ public class SpringConfig {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder.build();
+    }
+
+    @Bean
+    public Gson gson() {
+        return new Gson();
     }
 }

@@ -23,7 +23,7 @@ public class CourseTypeController {
 
     @PostMapping
     public ResponseEntity add(@Valid @RequestBody CourseTypeDto courseType) throws Exception {
-        CourseType mapped = mapper.map(courseType, CourseType.class);
+        CourseType mapped = mapper.map (courseType, CourseType.class);
         return ResponseEntity
                 .status(201)
                 .body(
